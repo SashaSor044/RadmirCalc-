@@ -1,0 +1,351 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор утилізації авто RADMIR</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #eef2f7;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #4cae4c;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #result {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f1f8e9;
+            border: 2px solid #aed581;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Калькулятор утилізації авто</h1>
+    
+    <div class="form-group">
+        <label for="carSearch">Пошук автомобіля:</label>
+        <input type="text" id="carSearch" placeholder="Введіть назву або марку...">
+    </div>
+
+    <div class="form-group">
+        <label for="carSelect">Оберіть автомобіль:</label>
+        <select id="carSelect"></select>
+    </div>
+
+    <div class="form-group">
+        <label for="wearInput">Введіть % зносу (від 0 до 100):</label>
+        <input type="number" id="wearInput" min="0" max="100">
+    </div>
+
+    <button onclick="calculateUtilization()">Розрахувати</button>
+
+    <div id="result">
+        Вартість утилізації: 0 рублів
+    </div>
+</div>
+
+<script>
+    const cars = {
+        'Alfa Romeo Giulia': 4000000,
+        'AUDI A4 Avant B9': 4000000,
+        'AUDI A5 Coupe Sportback': 4800000,
+        'AUDI A6 C7': 4000000,
+        'AUDI Q7 V12 TDI': 2500000,
+        'AUDI QUATTRO': 2500000,
+        'AUDI RS6 C5': 1500000,
+        'AUDI S3 8V': 2100000,
+        'BMW 1M E82': 1900000,
+        'BMW 325i E36': 700000,
+        'BMW 540i E34': 900000,
+        'BMW 540i E39': 1300000,
+        'BMW 740 F02': 2900000,
+        'BMW 750i E38': 1400000,
+        'BMW M3 E46': 1300000,
+        'BMW M3 E92': 2500000,
+        'BMW M5 E60': 3000000,
+        'BMW M5 F90': 11500000,
+        'BMW X5 E53': 1300000,
+        'BMW X5M E70': 2500000,
+        'BMW X6M E71': 2600000,
+        'Cadillac Escalade': 5000000,
+        'Chevrolet Corvette C6': 4500000,
+        'Chevrolet Suburban': 1200000,
+        'Dodge Challenger SRT Hellcat': 6000000,
+        'Ford Focus 3': 720000,
+        'Ford Focus RS': 1800000,
+        'Ford Mustang Shelby': 5000000,
+        'Ford Raptor F150': 2800000,
+        'Honda Accord Type S': 990000,
+        'Honda Civic TypeR FK8': 2000000,
+        'Honda Civic TypeR FN2': 900000,
+        'Honda S2000': 1600000,
+        'Hummer H2': 3000000,
+        'Hyundai Santa Fe': 700000,
+        'Infinity Q50': 2800000,
+        'Jeep Gladiator': 6000000,
+        'Jeep Grand Cherokee': 800000,
+        'KIA K5': 3000000,
+        'Land Rover Defender': 4800000,
+        'Lexus GS 350': 3800000,
+        'Lexus IS F': 2200000,
+        'Lexus LX 570': 5500000,
+        'Lexus RC-F': 4000000,
+        'Mazda 3 MPS': 750000,
+        'Mazda MX-5': 1020000,
+        'Mazda RX-7 Spirit R': 1600000,
+        'Mercedes C63 W204': 3200000,
+        'Mercedes CLS53 C257': 5500000,
+        'Mercedes CLS63 AMG C218': 4500000,
+        'Mercedes CLS63 AMG S219': 3000000,
+        'Mercedes E420 W210': 780000,
+        'Mercedes E500 W124': 900000,
+        'Mercedes E500 W211': 1700000,
+        'Mercedes E63 AMG W211': 3800000,
+        'Mercedes E63s W213': 5500000,
+        'Mercedes GL63 AMG X166': 3800000,
+        'Mercedes ML63 AMG W164': 2000000,
+        'Mercedes S320 CDI W220': 700000,
+        'Mercedes S65 AMG V221': 3200000,
+        'Mercedes W140': 1200000,
+        'Mercedes X-Class': 2500000,
+        'Mini JCW GP': 1700000,
+        'Mitsubithsi Lancer EVO IX': 2000000,
+        'Mitsubithsi EVO X': 800000,
+        'Nissan 180SX': 1200000,
+        'Nissan 370Z': 1800000,
+        'Nissan 400Z': 2500000,
+        'Nissan Patrol Y61': 1800000,
+        'Nissan Skyline ER34': 1200000,
+        'Skoda Octavia VRS': 2000000,
+        'Subaru Impreza WRX STI': 1200000,
+        'Subaru WRX Sti': 1800000,
+        'Toyota 4Runner': 3000000,
+        'Toyota Altezza': 1000000,
+        'Toyota Camry V40': 850000,
+        'Toyota Camry V55': 1500000,
+        'Toyota Camry V70': 3500000,
+        'Toyota Chaser': 1100000,
+        'Toyota LC 100': 1600000,
+        'Toyota LC 200 II': 4000000,
+        'Toyota LC Prado 150': 2300000,
+        'Toyota Mark II 100': 1200000,
+        'Toyota Mark II 90': 1050000,
+        'Toyota Supra A80': 2000000,
+        'Toyota Supra A90 GR': 6000000,
+        'Toyota Supra RG A90': 6000000,
+        'Toyota Tundra': 3500000,
+        'Volkswagen Golf R': 2000000,
+        'Volkswagen Passat B8': 1500000,
+        'Volkswagen Scirocco': 1600000,
+        'Volkswagen Touareg I': 1500000,
+        'Volkswagen Touareg II': 1900000,
+        'Volvo V60': 1800000,
+        'VOLVO XC90': 3150000,
+        'Zeekr 001': 3500000
+    };
+
+    const utilizationTable = [
+        { wearMin: 100, wearMax: 100, percentage: 0.10 },
+        { wearMin: 95, wearMax: 99, percentage: 0.11 },
+        { wearMin: 90, wearMax: 94, percentage: 0.12 },
+        { wearMin: 85, wearMax: 89, percentage: 0.13 },
+        { wearMin: 80, wearMax: 84, percentage: 0.14 },
+        { wearMin: 75, wearMax: 79, percentage: 0.15 },
+        { wearMin: 70, wearMax: 74, percentage: 0.16 },
+        { wearMin: 65, wearMax: 69, percentage: 0.17 },
+        { wearMin: 60, wearMax: 64, percentage: 0.18 },
+        { wearMin: 55, wearMax: 59, percentage: 0.19 },
+        { wearMin: 50, wearMax: 54, percentage: 0.20 },
+        { wearMin: 45, wearMax: 49, percentage: 0.21 },
+        { wearMin: 40, wearMax: 44, percentage: 0.22 },
+        { wearMin: 35, wearMax: 39, percentage: 0.23 },
+        { wearMin: 30, wearMax: 34, percentage: 0.24 },
+        { wearMin: 25, wearMax: 29, percentage: 0.25 },
+        { wearMin: 20, wearMax: 24, percentage: 0.26 },
+        { wearMin: 15, wearMax: 19, percentage: 0.27 },
+        { wearMin: 10, wearMax: 14, percentage: 0.28 },
+        { wearMin: 5, wearMax: 9, percentage: 0.29 },
+        { wearMin: 0, wearMax: 4, percentage: 0.30 } 
+    ];
+
+    function groupCarsByBrand() {
+        const brands = {};
+        Object.keys(cars).sort().forEach(carName => {
+            const brand = carName.split(' ')[0];
+            if (!brands[brand]) {
+                brands[brand] = [];
+            }
+            brands[brand].push(carName);
+        });
+        return brands;
+    }
+
+    function populateCarSelect(filteredCars = cars) {
+        const carSelect = document.getElementById('carSelect');
+        carSelect.innerHTML = '';
+        
+        const groupedCars = {};
+        Object.keys(filteredCars).sort().forEach(carName => {
+            const brand = carName.split(' ')[0];
+            if (!groupedCars[brand]) {
+                groupedCars[brand] = [];
+            }
+            groupedCars[brand].push(carName);
+        });
+        
+        for (const brand in groupedCars) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = brand;
+            groupedCars[brand].forEach(carName => {
+                const option = document.createElement('option');
+                option.value = carName;
+                option.text = `${carName} - ${cars[carName].toLocaleString('ru-RU')} ₽`;
+                optgroup.appendChild(option);
+            });
+            carSelect.appendChild(optgroup);
+        }
+    }
+
+    function saveState() {
+        const wearInput = document.getElementById('wearInput').value;
+        const carSelect = document.getElementById('carSelect').value;
+        localStorage.setItem('lastWear', wearInput);
+        localStorage.setItem('lastCar', carSelect);
+    }
+
+    function loadState() {
+        const lastWear = localStorage.getItem('lastWear');
+        const lastCar = localStorage.getItem('lastCar');
+        if (lastWear) {
+            document.getElementById('wearInput').value = lastWear;
+        }
+        if (lastCar) {
+            document.getElementById('carSelect').value = lastCar;
+        }
+    }
+
+    function calculateUtilization() {
+        const carSelect = document.getElementById('carSelect');
+        const wearInput = document.getElementById('wearInput');
+        const resultDiv = document.getElementById('result');
+
+        const selectedCar = carSelect.value;
+        const wear = parseFloat(wearInput.value);
+
+        if (isNaN(wear) || wear < 0 || wear > 100) {
+            resultDiv.textContent = 'Будь ласка, введіть коректний відсоток зносу (від 0 до 100).';
+            resultDiv.style.color = '#d32f2f';
+            resultDiv.style.borderColor = '#d32f2f';
+            return;
+        }
+        
+        resultDiv.style.color = '#388e3c';
+        resultDiv.style.borderColor = '#aed581';
+
+        const govPrice = cars[selectedCar];
+        let utilizationPercentage = 0;
+
+        for (const range of utilizationTable) {
+            if (wear >= range.wearMin && wear <= range.wearMax) {
+                utilizationPercentage = range.percentage;
+                break;
+            }
+        }
+
+        const utilizationPrice = govPrice * utilizationPercentage;
+        resultDiv.textContent = `Вартість утилізації: ${utilizationPrice.toLocaleString('ru-RU')} рублів`;
+        
+        saveState();
+    }
+
+    document.getElementById('carSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const filteredCars = {};
+        for (const carName in cars) {
+            if (carName.toLowerCase().includes(searchTerm)) {
+                filteredCars[carName] = cars[carName];
+            }
+        }
+        populateCarSelect(filteredCars);
+    });
+
+    window.onload = function() {
+        populateCarSelect();
+        loadState();
+    };
+</script>
+
+</body>
+</html>
